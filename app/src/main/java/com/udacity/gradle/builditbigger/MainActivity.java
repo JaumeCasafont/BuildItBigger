@@ -9,6 +9,9 @@ import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.jcr.javajokes.Joker;
 import com.jcr.jokeactivity.JokeActivity;
@@ -21,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements
         EndpointsAsyncTask.OnFinishedCallback,
         OnButtonClickListener {
 
-    private Joker mJoker;
+    private MainActivityFragment mainActivityFragment;
 
     @Nullable
     private SimpleIdlingResource mIdlingResource;
@@ -39,9 +42,10 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mJoker = new Joker();
-    }
 
+        mainActivityFragment = (MainActivityFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -67,11 +71,17 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void OnButtonClick() {
+        mainActivityFragment.setLoadingVisibility(View.VISIBLE);
+        mainActivityFragment.enableButton(false);
+
         new EndpointsAsyncTask(this).execute(mIdlingResource);
     }
 
     @Override
     public void onFinished(String joke) {
+        mainActivityFragment.setLoadingVisibility(View.GONE);
+        mainActivityFragment.enableButton(true);
+
         Intent intent = new Intent(this, JokeActivity.class);
         intent.putExtra(EXTRA_JOKE, joke);
         startActivity(intent);
