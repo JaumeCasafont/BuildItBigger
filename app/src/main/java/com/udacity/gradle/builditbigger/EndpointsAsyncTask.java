@@ -3,14 +3,14 @@ package com.udacity.gradle.builditbigger;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Pair;
-import android.widget.Toast;
+import android.support.test.espresso.IdlingResource;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.jcr.jokeactivity.JokeActivity;
+import com.udacity.gradle.builditbigger.IdlingResource.SimpleIdlingResource;
 import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
 
 import java.io.IOException;
@@ -21,12 +21,17 @@ import static com.jcr.jokeactivity.JokeActivity.EXTRA_JOKE;
  * Created by Jaume on 29/04/2018.
  */
 
-public class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
+public class EndpointsAsyncTask extends AsyncTask<SimpleIdlingResource, Void, String> {
     private static MyApi myApiService = null;
-    private Context context;
+    private SimpleIdlingResource mIdlingResource;
+    private OnFinishedCallback onFinishedCallback;
+
+    public EndpointsAsyncTask(OnFinishedCallback onFinishedCallback) {
+        this.onFinishedCallback = onFinishedCallback;
+    }
 
     @Override
-    protected String doInBackground(Context... params) {
+    protected String doInBackground(SimpleIdlingResource... params) {
         if(myApiService == null) {  // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null)
@@ -45,8 +50,10 @@ public class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
             myApiService = builder.build();
         }
 
-        context = params[0];
-
+        mIdlingResource = params[0];
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(false);
+        }
         try {
             return myApiService.tellJoke().execute().getData();
         } catch (IOException e) {
@@ -56,8 +63,13 @@ public class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
 
     @Override
     protected void onPostExecute(String joke) {
-        Intent intent = new Intent(context, JokeActivity.class);
-        intent.putExtra(EXTRA_JOKE, joke);
-        context.startActivity(intent);
+        onFinishedCallback.onFinished(joke);
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(true);
+        }
+    }
+
+    public interface OnFinishedCallback {
+        void onFinished(String joke);
     }
 }

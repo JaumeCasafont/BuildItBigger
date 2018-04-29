@@ -3,6 +3,10 @@ package com.udacity.gradle.builditbigger;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
 import android.view.Menu;
@@ -12,13 +16,27 @@ import android.widget.Toast;
 
 import com.jcr.javajokes.Joker;
 import com.jcr.jokeactivity.JokeActivity;
+import com.udacity.gradle.builditbigger.IdlingResource.SimpleIdlingResource;
 
 import static com.jcr.jokeactivity.JokeActivity.EXTRA_JOKE;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EndpointsAsyncTask.OnFinishedCallback {
 
     private Joker mJoker;
+
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,8 +68,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view) {
-        new EndpointsAsyncTask().execute(this);
+        new EndpointsAsyncTask(this).execute(mIdlingResource);
     }
 
-
+    @Override
+    public void onFinished(String joke) {
+        Intent intent = new Intent(this, JokeActivity.class);
+        intent.putExtra(EXTRA_JOKE, joke);
+        startActivity(intent);
+    }
 }
