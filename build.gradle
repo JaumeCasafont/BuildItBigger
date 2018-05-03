@@ -3,6 +3,7 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
         classpath 'com.google.guava:guava:22.0'
@@ -17,5 +18,32 @@ allprojects {
     repositories {
         jcenter()
         google()
+    }
+}
+
+task automaticTest {
+    dependsOn 'launchServer', 'runTests', 'shutDownServer'
+}
+
+task launchServer {
+    dependsOn ':backend:appengineStart'
+    doLast {
+        println "starting app engine..."
+    }
+}
+
+task runTests {
+    mustRunAfter 'launchServer'
+    dependsOn ':app:connectedAndroidTest'
+    doLast {
+        println "testing..."
+    }
+}
+
+task shutDownServer {
+    mustRunAfter 'runTests'
+    dependsOn ':backend:appengineStop'
+    doLast {
+        println "app engine stopped"
     }
 }

@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void OnButtonClick() {
+    public void onButtonClick() {
         mainActivityFragment.setLoadingVisibility(View.VISIBLE);
         mainActivityFragment.enableButton(false);
 

@@ -10,6 +10,6 @@ public class MainActivityFragment extends ButtonFragment {
 
     @Override
     protected void onButtonClick() {
-        mCallback.OnButtonClick();
+        mCallback.onButtonClick();
     }
 }

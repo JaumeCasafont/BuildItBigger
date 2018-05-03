@@ -7,5 +7,5 @@ import android.view.View;
  */
 
 public interface OnButtonClickListener {
-    void OnButtonClick();
+    void onButtonClick();
 }

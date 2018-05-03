@@ -38,7 +38,7 @@ public class MainActivityFragment extends ButtonFragment {
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdClosed() {
-                mCallback.OnButtonClick();
+                mCallback.onButtonClick();
             }
         });
     }
